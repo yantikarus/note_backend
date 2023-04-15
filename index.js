@@ -35,9 +35,6 @@ const requestLogger = (req, res, next)=>{
 
 app.use(requestLogger)
 
-// app.get('/', (req, res) => {
-//     res.send()
-// })
 app.get('/api/notes', (req, res) => {
     res.json(notes)
 })
@@ -85,10 +82,6 @@ app.post('/api/notes', (req, res)=> {
     res.json(note)
 })
 
-// const app = http.createServer((req, res)=>{
-//     res.writeHead(200, {'Content-Type': 'application/json'})
-//     res.end(JSON.stringify(notes))
-// })
 const unknownEndpoint = (request, response) => {
     response.status(404).send({ error: 'unknown endpoint' })
   }
