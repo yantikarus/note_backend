@@ -1,29 +1,33 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const Note = require('./models/note')
+console.log(Note, typeof(Note))
+
 
 app.use(cors())
 app.use(express.static('build'))
 // we use json-parser to receive data by the command below
 app.use(express.json())
 
-let notes = [
-    {
-        id: 1,
-        content: "HTML is easy",
-        important: true
-    },
-    {
-        id: 2,
-        content: "Browser can execute only JavaScript",
-        important: false
-    },
-    {
-        id: 3,
-        content: "GET and POST are the most important methods of HTTP protocol",
-        important: true
-    }
-]
+// let notes = [
+//     {
+//         id: 1,
+//         content: "HTML is easy",
+//         important: true
+//     },
+//     {
+//         id: 2,
+//         content: "Browser can execute only JavaScript",
+//         important: false
+//     },
+//     {
+//         id: 3,
+//         content: "GET and POST are the most important methods of HTTP protocol",
+//         important: true
+//     }
+// ]
 
 const requestLogger = (req, res, next)=>{
     console.log('Method:', req.method)
@@ -36,19 +40,14 @@ const requestLogger = (req, res, next)=>{
 app.use(requestLogger)
 
 app.get('/api/notes', (req, res) => {
-    res.json(notes)
+    Note.find({}).then(notes =>{
+        res.json(notes)
+    })
 })
 app.get('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    console.log(id)
-    const note = notes.find(note => {
-        return note.id === id
-    })
-    if (note) {
+    Note.findById(req.params.id).then(note => {
         res.json(note)
-    } else {
-        res.status(404).end()
-    }
+    })
 })
 app.delete('/api/notes/:id', (req, res) => {
     const id = Number(req.params.id)
@@ -71,15 +70,14 @@ app.post('/api/notes', (req, res)=> {
             error: 'content missing'
         })
     }
-   const note = {
+   const note = new Note({
     content: body.content,
     // default value of false if no important 
     important:body.important || false,
-    id: generateId(),
-   }
-    notes = notes.concat(note)
-    console.log(note)
-    res.json(note)
+   })
+   note.save().then(savedNote => {
+    res.json(savedNote)
+   })
 })
 
 const unknownEndpoint = (request, response) => {
@@ -88,7 +86,7 @@ const unknownEndpoint = (request, response) => {
   
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
