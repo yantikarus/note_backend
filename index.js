@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const Note = require('./models/note')
-console.log(Note, typeof(Note))
+console.log(Note, typeof (Note))
 
 
 app.use(cors())
@@ -46,9 +46,9 @@ app.get('/api/notes', (req, res) => {
 })
 app.get('/api/notes/:id', (req, res, next) => {
   Note.findById(req.params.id).then(note => {
-    if(note){
+    if (note) {
       res.json(note)
-    }else{
+    } else {
       res.status(404).end()
     }
   })
@@ -56,9 +56,9 @@ app.get('/api/notes/:id', (req, res, next) => {
 })
 app.delete('/api/notes/:id', (req, res, next) => {
   Note.findByIdAndRemove(req.params.id)
+  // eslint-disable-next-line no-unused-vars
     .then(result => {
       res.status(204).end()
-      console.log(result)
     })
     .catch(error => next(error))
 })
@@ -69,10 +69,10 @@ app.delete('/api/notes/:id', (req, res, next) => {
 //   return  maxId + 1
 // }
 
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
   const body = req.body
   // the body content should not be empty
-  if(!body.content){
+  if (!body.content) {
     // calling return here is essential bcause the code will execute to the very end and the malformed note get save to the app
     return res.status(400).json({
       error: 'content missing'
@@ -81,20 +81,21 @@ app.post('/api/notes', (req, res) => {
   const note = new Note({
     content: body.content,
     // default value of false if no important
-    important:body.important || false,
+    important: body.important || false,
   })
   note.save().then(savedNote => {
     res.json(savedNote)
   })
+    .catch(error => next(error))
 })
 
 app.put('/api/notes/:id', (req, res, next) => {
-  const body = req.body
-  const note = {
-    content:body.content,
-    important:body.important,
-  }
-  Note.findByIdAndUpdate(req.params.id, note, { new: true })
+  const { content, important } = req.body
+
+  Note.findByIdAndUpdate(
+    req.params.id,
+    { content, important },
+    { new: true, runValidators: true, context: 'query' })
     .then(updatedNote => {
       res.json(updatedNote)
     })
@@ -109,8 +110,10 @@ app.use(unknownEndpoint)
 
 const errorHandler = (error, req, res, next) => {
   console.log(error.message)
-  if(error.name === 'CastError'){
+  if (error.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
   }
   next(error)
 }

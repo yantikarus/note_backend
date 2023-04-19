@@ -7,15 +7,20 @@ const url = process.env.MONGODB_URI
 console.log('connecting to', url)
 
 mongoose.connect(url)
+// eslint-disable-next-line no-unused-vars
   .then(result => {
-    console.log('connected', result)
+    console.log('connected')
   })
   .catch((error) => {
     console.log('error connecting to MongoDB', error.message)
   })
 
 const noteSchema = new mongoose.Schema({
-  content: String,
+  content: {
+    type: String,
+    minLength: 5,
+    required:true
+  },
   important: Boolean,
 })
 noteSchema.set('toJSON', {
