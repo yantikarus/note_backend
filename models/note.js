@@ -7,23 +7,23 @@ const url = process.env.MONGODB_URI
 console.log('connecting to', url)
 
 mongoose.connect(url)
-.then(result => {
-    console.log("connected")
-})
-.catch((error)=>{
-    console.log("error connecting to MongoDB", error.message)
-})
+  .then(result => {
+    console.log('connected', result)
+  })
+  .catch((error) => {
+    console.log('error connecting to MongoDB', error.message)
+  })
 
 const noteSchema = new mongoose.Schema({
-    content: String,
-    important: Boolean,
+  content: String,
+  important: Boolean,
 })
 noteSchema.set('toJSON', {
-    transform: (document, returnObject)=>{
-        returnObject.id = returnObject._id.toString()
-        delete returnObject._id
-        delete returnObject.__v
-    }
+  transform: (document, returnObject) => {
+    returnObject.id = returnObject._id.toString()
+    delete returnObject._id
+    delete returnObject.__v
+  }
 })
 
 module.exports = mongoose.model('Note', noteSchema)
