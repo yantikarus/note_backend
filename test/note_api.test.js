@@ -9,11 +9,28 @@ const helper = require('./test_helper')
 beforeEach(async () => {
   //deleteMany is mongose function
   await Note.deleteMany({})
-  let noteObject = new Note(helper.initialNotes[0])
-  await noteObject.save()
-  noteObject = new Note(helper.initialNotes[1])
-  await noteObject.save()
+  console.log('cleared')
+  const noteObjects = helper.initialNotes.map(note => new Note(note))
+  const promiseArray = noteObjects.map(note => note.save())
+  await Promise.all(promiseArray)
+
+
+  helper.initialNotes.forEach( async (note) => {
+    let noteObject = new Note(note)
+    await noteObject.save()
+    console.log('saved')
+  })
+  console.log('done')
 })
+
+test('notes are returned as json', async () => {
+  console.log('entered test')
+  await api
+    .get('/api/notes')
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+},100000)
+
 test('a valid note can be added', async () => {
   const newNote = {
     content: 'async/await simplifies makin gasync calls',
@@ -48,16 +65,38 @@ test('note without content is not added', async () => {
 
   expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
 })
+//test for fetching and removing an individual notes
+test('a specific note can be viewed', async () => {
+  const notesAtStart = await helper.notesInDB()
+  const noteToView = notesAtStart[0]
 
-
-
-
-test('notes are returned as json', async () => {
-  await api
-    .get('/api/notes')
+  const resultNote = await api
+    .get(`/api/notes/${noteToView.id}`)
     .expect(200)
     .expect('Content-Type', /application\/json/)
-},100000)
+
+  expect(resultNote.body).toEqual(noteToView)
+})
+
+test('a note can be deleted', async () => {
+  const notesAtStart = await helper.notesInDB()
+  const noteToDelete = notesAtStart[0]
+
+  await api
+    .delete(`/api/notes/${noteToDelete.id}`)
+    .expect(204)
+
+  const notesAtEnd = await helper.notesInDB()
+  expect(notesAtEnd).toHaveLength(helper.initialNotes.length - 1)
+
+  const content = notesAtEnd.map(r => r.content)
+  expect(content).not.toContain(noteToDelete.content)
+
+})
+
+
+
+
 
 test('all notes are returned', async () => {
   const response = await api.get('/api/notes')
