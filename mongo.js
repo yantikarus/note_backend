@@ -8,7 +8,7 @@
 // const password = process.argv[2]
 
 // // change the databasename by inserting it after mongodb.net
-// const url = `mongodb+srv://wsutr:${password}@cluster0.vu3tk4f.mongodb.net/noteApp?retryWrites=true&w=majority`
+// const url = `mongodb+srv://wsutr:${password}@cluster0.vu3tk4f.mongodb.net/testNoteApp?retryWrites=true&w=majority`
 
 // mongoose.set('strictQuery', false)
 // mongoose.connect(url)
@@ -31,7 +31,7 @@
 //   })
 //   mongoose.connection.close()
 // })
-
+// //
 // // note.save().then(result => {
 // //     console.log('note saved!')
 // //     mongoose.connection.close()

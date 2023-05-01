@@ -1,10 +1,9 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
 
-notesRouter.get('/', (req, res) => {
-  Note.find({}).then(notes => {
-    res.json(notes)
-  })
+notesRouter.get('/', async (req, res) => {
+  const notes = await Note.find({})
+  res.json(notes)
 })
 
 notesRouter.get('/:id', (req, res, next) => {
@@ -19,7 +18,7 @@ notesRouter.get('/:id', (req, res, next) => {
     .catch(error => next(error))
 })
 
-notesRouter.post('/', (req, res, next) => {
+notesRouter.post('/', async (req, res, next) => {
   const body = req.body
   // the body content should not be empty
   if (!body.content) {
@@ -33,10 +32,17 @@ notesRouter.post('/', (req, res, next) => {
     // default value of false if no important
     important: body.important || false,
   })
-  note.save().then(savedNote => {
-    res.json(savedNote)
-  })
-    .catch(error => next(error))
+  try {
+    const savedNote = await note.save()
+    res.status(201).json(savedNote)
+  } catch(exception) {
+    next(exception)
+  }
+
+  // note.save().then(savedNote => {
+  //   res.status(201).json(savedNote)
+  // })
+  // .catch(error => next(error))
 })
 
 notesRouter.delete('/:id', (req, res, next) => {
