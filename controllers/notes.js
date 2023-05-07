@@ -1,6 +1,18 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+
+//define function to extract token
+const getTokenFrom = req => {
+
+  const authorization = req.get('authorization')
+  console.log('the auth from gettokenfrom is', authorization)
+  if(authorization && authorization.startsWith('Bearer ')){
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
 
 notesRouter.get('/', async (req, res) => {
   const notes = await Note
@@ -15,21 +27,18 @@ notesRouter.get('/:id', async (req, res) => {
   } else {
     res.status(404).end()
   }
-
-  // Note.findById(req.params.id)
-  //   .then(note => {
-  //     if (note) {
-  //       res.json(note)
-  //     } else {
-  //       res.status(404).end()
-  //     }
-  //   })
-  // .catch(error => next(error))
 })
 
 notesRouter.post('/', async (req, res) => {
   const body = req.body
-  const user = await User.findById(body.userId)
+  //we check if the token match by verify ing it
+  const decodedToken = jwt.verify(getTokenFrom(req), process.env.SECRET)
+  console.log('the decoded token is', decodedToken)
+  if(!decodedToken.id){
+    return res.status(401).json({ error: 'token invalid' })
+  }
+  //now check in db with decoded token id, as token will extract username and id
+  const user = await User.findById(decodedToken.id)
   // the body content should not be empty
   if (!body.content) {
     // calling return here is essential bcause the code will execute to the very end and the malformed note get save to the app

@@ -27,8 +27,10 @@ loginRouter.post('/', async (req, res) => {
     username : user.username,
     id:user._id,
   }
-  //create JWT token
-  const token = jwt.sign(userForToken, process.env.SECRET)
+  //create JWT token and add expiration of one hour
+  const token = jwt.sign(
+    userForToken, process.env.SECRET,
+    { expiresIn: 60*60 })
   //send teh status and the token along with username and name
   res.status(200).send({ token, username: user.username, name:user.name })
 })
