@@ -1,8 +1,10 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
+const User = require('../models/user')
 
 notesRouter.get('/', async (req, res) => {
-  const notes = await Note.find({})
+  const notes = await Note
+    .find({}).populate('user', { username: 1, name:1 })
   res.json(notes)
 })
 
@@ -27,6 +29,7 @@ notesRouter.get('/:id', async (req, res) => {
 
 notesRouter.post('/', async (req, res) => {
   const body = req.body
+  const user = await User.findById(body.userId)
   // the body content should not be empty
   if (!body.content) {
     // calling return here is essential bcause the code will execute to the very end and the malformed note get save to the app
@@ -37,9 +40,13 @@ notesRouter.post('/', async (req, res) => {
   const note = new Note({
     content: body.content,
     // default value of false if no important
-    important: body.important || false,
+    important: body.important === undefined ? false : body.important,
+    user: user.id
   })
   const savedNote = await note.save()
+  //update user notes by concating the savedNote id
+  user.notes = user.notes.concat(savedNote._id)
+  await user.save()
   res.status(201).json(savedNote)
   // note.save().then(savedNote => {
   //   res.status(201).json(savedNote)
@@ -65,7 +72,7 @@ notesRouter.delete('/:id', async (req, res) => {
   //   .catch(error => next(error))
 })
 
-notesRouter.put('/api/notes/:id', (req, res, next) => {
+notesRouter.put('/:id', (req, res, next) => {
   const { content, important } = req.body
 
   Note.findByIdAndUpdate(
