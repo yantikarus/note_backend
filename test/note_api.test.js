@@ -10,18 +10,6 @@ beforeEach(async () => {
   //deleteMany is mongose function
   await Note.deleteMany({})
   await Note.insertMany(helper.initialNotes)
-  // console.log('cleared')
-  // const noteObjects = helper.initialNotes.map(note => new Note(note))
-  // const promiseArray = noteObjects.map(note => note.save())
-  // await Promise.all(promiseArray)
-
-
-  // helper.initialNotes.forEach( async (note) => {
-  //   let noteObject = new Note(note)
-  //   await noteObject.save()
-  //   console.log('saved')
-  // })
-  // console.log('done')
 })
 describe('when thre is initially some notes saved', () => {
   test('notes are returned as json', async () => {
