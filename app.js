@@ -10,6 +10,9 @@ const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 
+//When strict option is set to true , Mongoose will ensure that only the fields
+//that are specified in your Schema will be saved in the database,
+//and all other fields will not be saved (if some other fields are sent)
 mongoose.set('strictQuery',false)
 logger.info('connecting to ', config.MONGODB_URI)
 

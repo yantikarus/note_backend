@@ -1,6 +1,6 @@
 // This module only defines Mongoose schema for notes
 const mongoose = require('mongoose')
-
+//define the schema and detail
 const noteSchema = new mongoose.Schema({
   content: {
     type: String,
@@ -13,6 +13,7 @@ const noteSchema = new mongoose.Schema({
     ref: 'User'
   }
 })
+//set the return object as jsonmodify the return object and delete unnecessary item
 noteSchema.set('toJSON', {
   transform: (document, returnObject) => {
     returnObject.id = returnObject._id.toString()
